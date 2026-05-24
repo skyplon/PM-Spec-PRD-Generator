@@ -228,6 +228,54 @@ Open **http://localhost:5174**
 
 ---
 
+## Known Limitations
+
+These are deliberate constraints in the current implementation, not oversights. Each one represents a tradeoff made to ship a working product, with a known path to resolution.
+
+**Output volume is intentionally capped.**
+The spec writer currently generates exactly 3 user stories, 2 acceptance criteria per story, 3 success metrics, and 4 edge cases. This is a workaround, not a design choice. The underlying model (`claude-haiku-4-5`) has an 8,192 output token ceiling. A fully detailed PRD for a complex feature — with 5–7 stories and 3 AC each — routinely exceeds that limit, causing the Instructor schema validation to fail mid-generation and return nothing. The correct fix is to upgrade to `claude-sonnet` (64k output tokens) or split generation across two sequential calls: one for stories and metrics, one for risks and edge cases. The current cap ensures consistent, complete output at the cost of depth.
+
+**Competitive research quality depends on the feature description.**
+The research agent runs a single web search pass. For well-known feature categories (e.g., "expense approvals," "email tone detection") it surfaces relevant competitor data reliably. For internal tooling, niche verticals, or highly specific B2B workflows, the search results are generic and add limited value to the spec. A multi-query research strategy — breaking the idea into 3–4 targeted searches — would improve coverage significantly.
+
+**Refinement does not have memory across sessions.**
+Each refinement call is stateless. If you refine a spec, close the browser, and reopen it, the history is gone. The PRD lives in React state only — there is no persistence layer. This means the tool is suited for single-session spec drafting, not async collaborative workflows where a PM and engineering lead iterate over multiple days.
+
+**The generated PRD does not adapt to company-specific context.**
+All specs are generated from general product knowledge. There is no mechanism to inject company terminology, existing design patterns, an established tech stack, or prior PRDs as context. A RAG layer over internal documentation would allow the tool to write specs that sound like they belong to a specific product organization.
+
+**Export formatting is functional, not polished.**
+The Word and PDF exports produce clean, readable documents but do not match the visual standards of a professional template (no branded headers, no logo, no custom typography). For internal use this is acceptable. For client-facing or exec-review specs, a template-based export layer would be required.
+
+---
+
+## Future Enhancements
+
+The following represent the highest-value improvements, ordered by expected impact on output quality and user adoption.
+
+**Upgrade to claude-sonnet for unconstrained output depth.**
+Removing the artificial token cap and letting the model generate as many stories, metrics, and edge cases as the feature warrants is the single highest-impact change. The PRD quality in the current version is limited not by the model's reasoning but by its output budget.
+
+**Multi-query competitive research.**
+Instead of one broad web search, decompose the feature idea into 3–4 targeted queries: competitor feature pages, user review sites (G2, Reddit, App Store), recent product changelog posts, and job postings (which signal where competitors are investing). This would produce materially richer competitive context sections.
+
+**RAG over internal documentation.**
+Allow teams to upload existing PRDs, design principles, a product glossary, and engineering constraints. The spec writer would retrieve relevant context before generating, producing output that uses the company's terminology, respects its established patterns, and doesn't contradict decisions already made.
+
+**Session persistence and async collaboration.**
+Store generated specs in a database with a shareable link. Allow a PM to generate a spec, share it with an engineering lead for async review, and refine it collaboratively over multiple sessions — with a version history showing what changed between iterations.
+
+**PRD scoring and completeness check.**
+After generation, run a second LLM pass that scores the spec against a PM quality rubric: Are the acceptance criteria actually testable? Do the success metrics have realistic baselines? Are the edge cases specific enough for an engineer to act on? Surface a completeness score with specific improvement suggestions before the PM exports.
+
+**Template library for common feature patterns.**
+Pre-built context packs for recurring feature types — authentication flows, notification systems, onboarding checklists, billing and pricing changes — that inject domain-specific edge cases and risks the model might otherwise miss. A notification system spec should always address delivery failures, opt-out flows, and rate limiting; a billing change spec should always address prorated charges, failed payment retries, and tax handling.
+
+**Spec-to-ticket generation.**
+One-click export of each user story as a Jira epic or Linear project, with acceptance criteria mapped to sub-tasks and the open questions filed as blockers. This closes the loop between spec creation and execution tracking.
+
+---
+
 ## Related Work
 
 - [AI Meeting Co-pilot](https://github.com/skyplon/ai-meeting-copilot) — LangGraph agent pipeline that converts meeting transcripts into action items, routed tasks, and follow-up emails
