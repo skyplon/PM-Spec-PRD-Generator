@@ -2,6 +2,8 @@
 
 **An AI-powered tool that transforms a feature idea into a structured, developer-ready PRD in under 30 seconds** — complete with competitive research, typed user stories, acceptance criteria, success metrics, and engineering-ready edge cases.
 
+**🟢 Live demo: [pm-spec-prd-generator.vercel.app](https://pm-spec-prd-generator.vercel.app)**
+
 Built for product managers who spend 4–8 hours writing specs that could be written in minutes with the right AI pipeline behind them.
 
 ---
