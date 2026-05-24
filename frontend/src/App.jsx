@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react'
 import InputForm from './components/InputForm.jsx'
 import GeneratingView from './components/GeneratingView.jsx'
 import PRDView from './components/PRDView.jsx'
+import { API_BASE } from './config.js'
 
 export default function App() {
   const [view, setView]       = useState('input')
@@ -16,7 +17,7 @@ export default function App() {
     setView('generating')
 
     try {
-      const res = await fetch('/api/generate', {
+      const res = await fetch(`${API_BASE}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -67,7 +68,7 @@ export default function App() {
   const handleRefine = useCallback(async (instruction) => {
     if (!prd) return
     try {
-      const res = await fetch('/api/refine', {
+      const res = await fetch(`${API_BASE}/api/refine`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prd, instruction }),

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { API_BASE } from '../config.js'
 
 const PRIORITY = {
   'must-have':    { label: 'Must-have',    color: 'var(--coral)',  bg: 'var(--coral-light)' },
@@ -30,11 +31,11 @@ export default function PRDView({ prd, onRefine, onReset }) {
     setExporting(format)
     try {
       if (format === 'md') {
-        const res  = await fetch('/api/export/markdown', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(prd) })
+        const res  = await fetch(`${API_BASE}/api/export/markdown`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(prd) })
         const { markdown } = await res.json()
         downloadBlob(new Blob([markdown], { type: 'text/markdown' }), `${slug(prd.title)}.md`)
       } else {
-        const res = await fetch(`/api/export/${format}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(prd) })
+        const res = await fetch(`${API_BASE}/api/export/${format}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(prd) })
         if (!res.ok) throw new Error(`Export failed: ${res.statusText}`)
         const blob = await res.blob()
         const ext  = format === 'docx' ? 'docx' : 'pdf'
@@ -47,7 +48,7 @@ export default function PRDView({ prd, onRefine, onReset }) {
   }
 
   const openGoogleDocs = async () => {
-    const res = await fetch('/api/export/markdown', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(prd) })
+    const res = await fetch(`${API_BASE}/api/export/markdown`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(prd) })
     const { markdown } = await res.json()
     await navigator.clipboard.writeText(markdown)
     window.open('https://docs.new', '_blank')
